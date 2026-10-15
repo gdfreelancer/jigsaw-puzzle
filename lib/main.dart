@@ -6,10 +6,30 @@ const artFiles=['sunrise.svg','forest.svg','coast.svg','desert.svg','meadow.svg'
 const artNames=['Golden Horizon','Misty Forest','Blue Coast','Desert Dream','Wildflower','Alpine Light','Autumn Path','Moonlit Peaks'];
 void go(BuildContext c,Widget w)=>Navigator.push(c,MaterialPageRoute(builder:(_)=>w));
 void notice(BuildContext c,String s)=>ScaffoldMessenger.of(c).showSnackBar(SnackBar(content:Text(s)));
-class PuzzleApp extends StatelessWidget{const PuzzleApp({super.key});@override Widget build(BuildContext c)=>MaterialApp(title:'Art Block Puzzle',debugShowCheckedModeBanner:false,theme:ThemeData(useMaterial3:true,scaffoldBackgroundColor:bg,colorScheme:ColorScheme.fromSeed(seedColor:green),appBarTheme:const AppBarTheme(backgroundColor:bg,foregroundColor:ink,elevation:0)),home:const Home());}
+class PuzzleApp extends StatelessWidget{const PuzzleApp({super.key});@override Widget build(BuildContext c)=>MaterialApp(title:'Art Block Puzzle',debugShowCheckedModeBanner:false,theme:ThemeData(useMaterial3:true,scaffoldBackgroundColor:bg,colorScheme:ColorScheme.fromSeed(seedColor:green),appBarTheme:const AppBarTheme(backgroundColor:bg,foregroundColor:ink,elevation:0)),home:const SplashScreen());}
 class Art extends StatelessWidget{final String file;final double? h,w;const Art(this.file,{super.key,this.h,this.w});@override Widget build(BuildContext c)=>ClipRRect(borderRadius:BorderRadius.circular(20),child:SvgPicture.asset('assets/artwork/'+file,height:h,width:w,fit:BoxFit.cover));}
 class Btn extends StatelessWidget{final String label;final VoidCallback tap;final bool secondary;final IconData? icon;const Btn(this.label,this.tap,{super.key,this.secondary=false,this.icon});@override Widget build(BuildContext c)=>SizedBox(width:double.infinity,height:52,child:FilledButton(onPressed:tap,style:FilledButton.styleFrom(backgroundColor:secondary?const Color(0xFFE7E9DF):ink,foregroundColor:secondary?ink:Colors.white,shape:RoundedRectangleBorder(borderRadius:BorderRadius.circular(17))),child:Row(mainAxisAlignment:MainAxisAlignment.center,children:[if(icon!=null)Icon(icon),if(icon!=null)const SizedBox(width:8),Text(label,style:const TextStyle(fontWeight:FontWeight.w800))])));}
 class Frame extends StatelessWidget{final String title;final Widget child;const Frame(this.title,this.child,{super.key});@override Widget build(BuildContext c)=>Scaffold(appBar:AppBar(title:Text(title,style:const TextStyle(fontWeight:FontWeight.w900)),leading:IconButton(onPressed:()=>Navigator.maybePop(c),icon:const Icon(Icons.arrow_back))),body:SafeArea(child:child));}
+class SplashScreen extends StatelessWidget {
+  const SplashScreen({super.key});
+  @override Widget build(BuildContext context) => Scaffold(
+    body: SafeArea(child: Padding(padding: const EdgeInsets.all(24), child: Column(
+      crossAxisAlignment: CrossAxisAlignment.start, mainAxisAlignment: MainAxisAlignment.center, children: [
+        Container(width:66,height:66,decoration:BoxDecoration(color:ink,borderRadius:BorderRadius.circular(20)),child:const Icon(Icons.extension_rounded,color:lime,size:38)),
+        const SizedBox(height:28),
+        const Text('ART BLOCK',style:TextStyle(fontSize:36,fontWeight:FontWeight.w900,letterSpacing:-1.2,color:ink)),
+        const Text('PUZZLE STUDIO',style:TextStyle(fontSize:12,fontWeight:FontWeight.w900,letterSpacing:3,color:green)),
+        const SizedBox(height:20),
+        const Text('Slow down. Find the pieces. Reveal the art.',style:TextStyle(color:muted,fontSize:16)),
+        const SizedBox(height:28),
+        const Artwork('sunrise.svg',height:230,width:500),
+        const SizedBox(height:26),
+        ActionButton('Enter studio',()=>Navigator.pushReplacement(context,MaterialPageRoute(builder:(_)=>const HomeScreen())),icon:Icons.arrow_forward_rounded),
+      ],
+    ))),
+  );
+}
+
 class Home extends StatelessWidget{const Home({super.key});@override Widget build(BuildContext c)=>Scaffold(body:SafeArea(child:ListView(padding:const EdgeInsets.all(22),children:[
 Row(children:[Container(width:44,height:44,decoration:BoxDecoration(color:ink,borderRadius:BorderRadius.circular(14)),child:const Icon(Icons.extension,color:lime,size:27)),const SizedBox(width:10),const Expanded(child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text('ART BLOCK',style:TextStyle(fontSize:19,fontWeight:FontWeight.w900,letterSpacing:1.3)),Text('PUZZLE STUDIO',style:TextStyle(color:muted,fontSize:10,letterSpacing:2))])),const Icon(Icons.circle,color:Color(0xFFE5B85C),size:15),const SizedBox(width:5),const Text('240',style:TextStyle(fontWeight:FontWeight.w900))]),
 const SizedBox(height:25),const Text('A little art,\na little calm.',style:TextStyle(fontSize:38,height:1.05,fontWeight:FontWeight.w900,letterSpacing:-1.4,color:ink)),const SizedBox(height:8),const Text('Make space for a beautiful moment.',style:TextStyle(color:muted)),const SizedBox(height:20),
@@ -22,7 +42,7 @@ const SizedBox(height:14),Row(children:[Expanded(child:OutlinedButton.icon(onPre
 ])));}
 class _Tile extends StatelessWidget{final String title,sub;final IconData icon;final VoidCallback tap;const _Tile(this.title,this.sub,this.icon,this.tap);@override Widget build(BuildContext c)=>Material(color:Colors.white,borderRadius:BorderRadius.circular(18),child:InkWell(onTap:tap,borderRadius:BorderRadius.circular(18),child:Padding(padding:const EdgeInsets.all(14),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Icon(icon,color:green),const SizedBox(height:12),Text(title,style:const TextStyle(fontWeight:FontWeight.w900)),Text(sub,style:const TextStyle(color:muted,fontSize:11))]))));}
 class _Stat extends StatelessWidget{final String v,l;const _Stat(this.v,this.l);@override Widget build(BuildContext c)=>Expanded(child:Column(children:[Text(v,style:const TextStyle(fontSize:20,fontWeight:FontWeight.w900)),Text(l,style:const TextStyle(color:muted,fontSize:11))]));}
-class Levels extends StatelessWidget{const Levels({super.key});@override Widget build(BuildContext c)=>Frame('Choose your level',ListView(padding:const EdgeInsets.all(18),children:[const Text('Every picture tells a story.',style:TextStyle(color:muted)),const SizedBox(height:14),...List.generate(8,(i)=>Card(color:Colors.white,elevation:0,child:ListTile(leading:Art(artFiles[i],h:70,w:85),title:Text(artNames[i],style:const TextStyle(fontWeight:FontWeight.w900)),subtitle:Text((i>4?'Hard':'Easy')+' · Level '+(i+1).toString()),trailing:Icon(i>3?Icons.lock_outline:Icons.chevron_right,color:green),onTap:i>3?null:()=>go(c,Play(file:artFiles[i],title:artNames[i])))),),Btn('Daily challenge',()=>go(c,const Daily()),secondary:true)]));}
+class Levels extends StatelessWidget{const Levels({super.key});@override Widget build(BuildContext c)=>Frame('Choose your level',ListView(padding:const EdgeInsets.all(18),children:[const Text('Every picture tells a story.',style:TextStyle(color:muted)),const SizedBox(height:14),...List.generate(8,(i)=>Card(color:Colors.white,elevation:0,child:ListTile(leading:Art(artFiles[i],h:70,w:85),title:Text(artNames[i],style:const TextStyle(fontWeight:FontWeight.w900)),subtitle:Text((i>4?'Hard':'Easy')+' · Level '+(i+1).toString()),trailing:Icon(i>3?Icons.lock_outline:Icons.chevron_right,color:green),onTap:i>3?null:()=>go(c,Play(file:artFiles[i],title:artNames[i]))))),Btn('Daily challenge',()=>go(c,const Daily()),secondary:true)]));}
 class Play extends StatefulWidget{final String file,title;const Play({super.key,this.file='sunrise.svg',this.title='Golden Horizon'});@override State<Play> createState()=>_PlayState();}
 class _PlayState extends State<Play>{final Set<int> filled={0,2,3,5};@override Widget build(BuildContext c)=>Scaffold(body:SafeArea(child:Padding(padding:const EdgeInsets.all(16),child:Column(children:[
 Row(children:[IconButton(onPressed:()=>showDialog(context:c,builder:(_)=>const Pause()),icon:const Icon(Icons.pause)),Expanded(child:Text(widget.title,style:const TextStyle(fontSize:18,fontWeight:FontWeight.w900))),const Text('240 coins')]),
