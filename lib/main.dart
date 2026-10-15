@@ -257,7 +257,38 @@ class _PlayScreenState extends State<PlayScreen> {
           Text(widget.title.toUpperCase(),maxLines:1,overflow:TextOverflow.ellipsis,style:const TextStyle(color:cream,fontWeight:FontWeight.w900,fontSize:14,letterSpacing:.7)),
           Text(widget.grid==3?'JUNIOR PUZZLE • 3 × 3':'PUZZLE PRO • 4 × 4',style:const TextStyle(color:muted,fontSize:9,fontWeight:FontWeight.w800,letterSpacing:1)),
         ])),
-        RoundIcon(Icons.visibility_rounded,()=>showDialog(context:context,builder:(d)=>Dialog(backgroundColor:panel,child:Padding(padding:const EdgeInsets.all(12),child:Column(mainAxisSize:MainAxisSize.min,children:[const Text('PICTURE PREVIEW',style:TextStyle(color:yellow,fontWeight:FontWeight.w900,letterSpacing:1)),const SizedBox(height:12),Art(widget.file,w:320,h:230),const SizedBox(height:12),TextButton(onPressed:()=>Navigator.pop(d),child:const Text('GOT IT'))])))),
+        RoundIcon(
+          Icons.visibility_rounded,
+          () => showDialog<void>(
+            context: context,
+            builder: (d) => Dialog(
+              backgroundColor: panel,
+              child: Padding(
+                padding: const EdgeInsets.all(12),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Text(
+                      'PICTURE PREVIEW',
+                      style: TextStyle(
+                        color: yellow,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Art(widget.file, w: 320, h: 230),
+                    const SizedBox(height: 12),
+                    TextButton(
+                      onPressed: () => Navigator.pop(d),
+                      child: const Text('GOT IT'),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        ),
       ])),
       Padding(padding:const EdgeInsets.symmetric(horizontal:20,vertical:5),child:Row(children:[
         const Icon(Icons.extension_rounded,color:yellow,size:18),const SizedBox(width:7),
