@@ -246,8 +246,18 @@ class _PlayScreenState extends State<PlayScreen> {
   }
   @override Widget build(BuildContext context)=>Scaffold(body:GameBackground(child:LayoutBuilder(builder:(context,constraints){
     final screenW=constraints.maxWidth;
-    final boardSide=min(screenW-36,390.0);
-    final tileSide=boardSide/widget.grid;
+    // Keep the artwork's real proportions: the current SVG collection uses a
+    // 600 × 420 viewBox, while this helper also supports portrait/square art.
+    final aspectRatio=artAspectRatio(widget.file);
+    final maxBoardHeight=min(constraints.maxHeight*.46,430.0);
+    final desiredBoardWidth=min(screenW-20,420.0);
+    final boardHeight=min(desiredBoardWidth/aspectRatio,maxBoardHeight);
+    final boardWidth=boardHeight*aspectRatio;
+    const boardGap=3.0;
+    final tileWidth=(boardWidth-8-(widget.grid-1)*boardGap)/widget.grid;
+    final tileHeight=(boardHeight-8-(widget.grid-1)*boardGap)/widget.grid;
+    final trayPieceWidth=min(tileWidth-4,76.0);
+    final trayPieceHeight=trayPieceWidth/aspectRatio;
     final remaining=tray.where((i)=>!placed.contains(i)).toList();
     return Column(children:[
       Padding(padding:const EdgeInsets.fromLTRB(16,8,16,8),child:Row(children:[
@@ -297,14 +307,56 @@ class _PlayScreenState extends State<PlayScreen> {
       ])),
       Padding(padding:const EdgeInsets.symmetric(horizontal:20),child:ClipRRect(borderRadius:BorderRadius.circular(10),child:LinearProgressIndicator(value:placed.length/(widget.grid*widget.grid),minHeight:7,backgroundColor:Colors.white10,color:mint))),
       const SizedBox(height:13),
-      Container(padding:const EdgeInsets.all(7),decoration:BoxDecoration(color:panel,borderRadius:BorderRadius.circular(22),border:Border.all(color:Colors.white12),boxShadow:const [BoxShadow(color:Colors.black26,blurRadius:20,offset:Offset(0,8))]),child:SizedBox(width:boardSide,height:boardSide,child:GridView.builder(
-        physics:const NeverScrollableScrollPhysics(),padding:EdgeInsets.zero,gridDelegate:SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:widget.grid,crossAxisSpacing:3,mainAxisSpacing:3),itemCount:widget.grid*widget.grid,
-        itemBuilder:(ctx,index)=>DragTarget<int>(
-          onWillAcceptWithDetails:(details)=>true,
-          onAcceptWithDetails:(details)=>_drop(details.data,index),
-          builder:(ctx,candidates,rejects)=>AnimatedContainer(duration:const Duration(milliseconds:180),decoration:BoxDecoration(color:placed.contains(index)?Colors.transparent:const Color(0xFF17192F),borderRadius:BorderRadius.circular(widget.grid==3?7:4),border:Border.all(color:candidates.isNotEmpty?yellow:(placed.contains(index)?mint.withOpacity(.7):Colors.white24),width:candidates.isNotEmpty?2:1)),child:placed.contains(index)?ArtSlice(file:widget.file,index:index,grid:widget.grid,size:tileSide):Center(child:candidates.isNotEmpty?const Icon(Icons.add_rounded,color:yellow,size:22):Text('＋',style:TextStyle(color:Colors.white.withOpacity(.16),fontSize:widget.grid==3?22:15,fontWeight:FontWeight.w300)))),
+      Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 10),
+        child: Center(
+          child: Container(
+            padding: const EdgeInsets.all(4),
+            decoration: BoxDecoration(
+              color: panel,
+              borderRadius: BorderRadius.circular(18),
+              border: Border.all(color: Colors.white12),
+              boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 20, offset: Offset(0, 8))],
+            ),
+            child: SizedBox(
+              width: boardWidth - 8,
+              height: boardHeight - 8,
+              child: GridView.builder(
+                physics: const NeverScrollableScrollPhysics(),
+                padding: EdgeInsets.zero,
+                gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: widget.grid,
+                  crossAxisSpacing: boardGap,
+                  mainAxisSpacing: boardGap,
+                ),
+                itemCount: widget.grid * widget.grid,
+                itemBuilder: (ctx, index) => DragTarget<int>(
+                  onWillAcceptWithDetails: (details) => !placed.contains(index),
+                  onAcceptWithDetails: (details) => _drop(details.data, index),
+                  builder: (ctx, candidates, rejects) => AnimatedContainer(
+                    duration: const Duration(milliseconds: 180),
+                    decoration: BoxDecoration(
+                      color: placed.contains(index) ? Colors.transparent : const Color(0xFF17192F),
+                      borderRadius: BorderRadius.circular(widget.grid == 3 ? 4 : 2),
+                      border: Border.all(
+                        color: candidates.isNotEmpty ? yellow : (placed.contains(index) ? mint.withOpacity(.7) : Colors.white24),
+                        width: candidates.isNotEmpty ? 2 : 1,
+                      ),
+                    ),
+                    child: placed.contains(index)
+                        ? ArtSlice(file: widget.file, index: index, grid: widget.grid, width: tileWidth, height: tileHeight)
+                        : Center(
+                            child: candidates.isNotEmpty
+                                ? const Icon(Icons.add_rounded, color: yellow, size: 22)
+                                : Text('＋', style: TextStyle(color: Colors.white.withOpacity(.16), fontSize: widget.grid == 3 ? 22 : 15, fontWeight: FontWeight.w300)),
+                          ),
+                  ),
+                ),
+              ),
+            ),
+          ),
         ),
-      ))),
+      ),
       const SizedBox(height:12),
       Padding(padding:const EdgeInsets.symmetric(horizontal:22),child:Row(children:[
         const Text('PIECE TRAY',style:TextStyle(color:cream,fontSize:12,fontWeight:FontWeight.w900,letterSpacing:1.4)),
@@ -312,10 +364,22 @@ class _PlayScreenState extends State<PlayScreen> {
       ])),
       const SizedBox(height:8),
       Expanded(child:Padding(padding:const EdgeInsets.symmetric(horizontal:16),child:remaining.isEmpty?const Center(child:Text('Amazing! Artwork restored!',style:TextStyle(color:mint,fontWeight:FontWeight.w900))):SingleChildScrollView(child:Wrap(alignment:WrapAlignment.center,spacing:8,runSpacing:8,children:remaining.map((piece)=>Draggable<int>(
-        data:piece,
-        feedback:Material(color:Colors.transparent,child:Container(width:tileSide+8,height:tileSide+8,padding:const EdgeInsets.all(2),decoration:BoxDecoration(color:yellow,borderRadius:BorderRadius.circular(10),boxShadow:const [BoxShadow(color:Colors.black45,blurRadius:15)]),child:ArtSlice(file:widget.file,index:piece,grid:widget.grid,size:tileSide+4))),
-        childWhenDragging:Opacity(opacity:.15,child:_TrayPiece(file:widget.file,index:piece,grid:widget.grid,size:min(tileSide-2,widget.grid==3?88.0:70.0))),
-        child:_TrayPiece(file:widget.file,index:piece,grid:widget.grid,size:min(tileSide-2,widget.grid==3?88.0:70.0)),
+        data: piece,
+        feedback: Material(
+          color: Colors.transparent,
+          child: Container(
+            width: trayPieceWidth + 8,
+            height: trayPieceHeight + 8,
+            padding: const EdgeInsets.all(2),
+            decoration: BoxDecoration(color: yellow, borderRadius: BorderRadius.circular(6), boxShadow: const [BoxShadow(color: Colors.black45, blurRadius: 15)]),
+            child: ArtSlice(file: widget.file, index: piece, grid: widget.grid, width: trayPieceWidth + 4, height: trayPieceHeight + 4),
+          ),
+        ),
+        childWhenDragging: Opacity(
+          opacity: .15,
+          child: _TrayPiece(file: widget.file, index: piece, grid: widget.grid, width: trayPieceWidth, height: trayPieceHeight),
+        ),
+        child: _TrayPiece(file: widget.file, index: piece, grid: widget.grid, width: trayPieceWidth, height: trayPieceHeight),
       )).toList())))),
       Padding(padding:const EdgeInsets.fromLTRB(20,4,20,12),child:Row(children:[
         Expanded(child:_ToolButton(icon:Icons.shuffle_rounded,label:'SHUFFLE',onTap:()=>setState(()=>tray.shuffle(Random())))),
@@ -329,20 +393,74 @@ class _PlayScreenState extends State<PlayScreen> {
   })));
 }
 
+double artAspectRatio(String file) {
+  // Ratios are read from each artwork's SVG viewBox. All bundled artwork is
+  // currently 600 × 420; keep the mapping explicit for future portrait/square art.
+  const ratios = <String, double>{
+    'sunrise.svg': 600 / 420,
+    'forest.svg': 600 / 420,
+    'coast.svg': 600 / 420,
+    'desert.svg': 600 / 420,
+    'meadow.svg': 600 / 420,
+    'mountains.svg': 600 / 420,
+    'autumn.svg': 600 / 420,
+    'night.svg': 600 / 420,
+  };
+  return ratios[file] ?? 1.0;
+}
+
 class ArtSlice extends StatelessWidget {
-  final String file;final int index,grid;final double size;
-  const ArtSlice({super.key,required this.file,required this.index,required this.grid,required this.size});
-  @override Widget build(BuildContext context){
-    final row=index~/grid,col=index%grid,full=size*grid;
-    return ClipRRect(borderRadius:BorderRadius.circular(3),child:SizedBox(width:size,height:size,child:Stack(clipBehavior:Clip.hardEdge,children:[
-      Positioned(left:-col*size,top:-row*size,width:full,height:full,child:Art(file,w:full,h:full,radius:BorderRadius.zero)),
-    ])));
+  final String file;
+  final int index, grid;
+  final double width, height;
+  const ArtSlice({super.key, required this.file, required this.index, required this.grid, required this.width, required this.height});
+
+  @override
+  Widget build(BuildContext context) {
+    final row = index ~/ grid;
+    final col = index % grid;
+    final fullWidth = width * grid;
+    final fullHeight = height * grid;
+    return ClipRect(
+      child: SizedBox(
+        width: width,
+        height: height,
+        child: Stack(
+          clipBehavior: Clip.hardEdge,
+          children: [
+            Positioned(
+              left: -col * width,
+              top: -row * height,
+              width: fullWidth,
+              height: fullHeight,
+              child: Art(file, w: fullWidth, h: fullHeight, radius: BorderRadius.zero),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }
+
 class _TrayPiece extends StatelessWidget {
-  final String file;final int index,grid;final double size;
-  const _TrayPiece({required this.file,required this.index,required this.grid,required this.size});
-  @override Widget build(BuildContext context)=>Container(width:size,height:size,padding:const EdgeInsets.all(2),decoration:BoxDecoration(color:panelLight,borderRadius:BorderRadius.circular(10),border:Border.all(color:Colors.white24),boxShadow:const [BoxShadow(color:Colors.black12,blurRadius:5,offset:Offset(0,3))]),child:ArtSlice(file:file,index:index,grid:grid,size:size-4));
+  final String file;
+  final int index, grid;
+  final double width, height;
+  const _TrayPiece({required this.file, required this.index, required this.grid, required this.width, required this.height});
+
+  @override
+  Widget build(BuildContext context) => Container(
+    width: width,
+    height: height,
+    padding: const EdgeInsets.all(2),
+    decoration: BoxDecoration(
+      color: panelLight,
+      borderRadius: BorderRadius.circular(6),
+      border: Border.all(color: Colors.white24),
+      boxShadow: const [BoxShadow(color: Colors.black12, blurRadius: 5, offset: Offset(0, 3))],
+    ),
+    child: ArtSlice(file: file, index: index, grid: grid, width: width - 4, height: height - 4),
+  );
 }
 class _ToolButton extends StatelessWidget {
   final IconData icon;final String label;final VoidCallback onTap;
