@@ -249,15 +249,15 @@ class _PlayScreenState extends State<PlayScreen> {
     // Keep the artwork's real proportions: the current SVG collection uses a
     // 600 × 420 viewBox, while this helper also supports portrait/square art.
     final aspectRatio=artAspectRatio(widget.file);
-    final maxBoardHeight=min(constraints.maxHeight*.46,430.0);
-    final desiredBoardWidth=min(screenW-20,420.0);
-    final boardHeight=min(desiredBoardWidth/aspectRatio,maxBoardHeight);
-    final boardWidth=boardHeight*aspectRatio;
-    const boardGap=3.0;
-    final tileWidth=(boardWidth-8-(widget.grid-1)*boardGap)/widget.grid;
-    final tileHeight=(boardHeight-8-(widget.grid-1)*boardGap)/widget.grid;
-    final trayPieceWidth=min(tileWidth-4,76.0);
-    final trayPieceHeight=trayPieceWidth/aspectRatio;
+    final maxBoardHeight = min(constraints.maxHeight * .46, 430.0).toDouble();
+    final desiredBoardWidth = min(screenW - 20, 420.0).toDouble();
+    final boardHeight = min(desiredBoardWidth / aspectRatio, maxBoardHeight).toDouble();
+    final boardWidth = boardHeight * aspectRatio;
+    const boardGap = 3.0;
+    final tileWidth = (boardWidth - 8 - (widget.grid - 1) * boardGap) / widget.grid;
+    final tileHeight = (boardHeight - 8 - (widget.grid - 1) * boardGap) / widget.grid;
+    final trayPieceWidth = min(tileWidth - 4, 76.0).toDouble();
+    final trayPieceHeight = trayPieceWidth / aspectRatio;
     final remaining=tray.where((i)=>!placed.contains(i)).toList();
     return Column(children:[
       Padding(padding:const EdgeInsets.fromLTRB(16,8,16,8),child:Row(children:[
