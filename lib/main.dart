@@ -235,7 +235,7 @@ class _PlayScreenState extends State<PlayScreen> {
   void _drop(int piece,int target){
     if(piece==target){
       if(!placed.contains(target)){setState(()=>placed.add(target));HapticFeedback.lightImpact();}
-      if(placed.length==widget.grid*widget.grid-1){
+      if(placed.length==widget.grid*widget.grid){
         Future.delayed(const Duration(milliseconds:450),(){if(mounted)push(context,CompleteScreen(file:widget.file,title:widget.title,grid:widget.grid));});
       }
     }else{
