@@ -1,0 +1,73 @@
+name: Android Release APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      build_type:
+        description: "Choose Android release output"
+        required: true
+        type: choice
+        options:
+          - apk
+          - appbundle
+        default: apk
+
+permissions:
+  contents: read
+
+jobs:
+  build-android:
+    name: Build Android release
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+          cache: gradle
+
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Show Flutter version
+        run: flutter --version
+
+      - name: Get dependencies
+        run: flutter pub get
+
+      - name: Check Dart code
+        run: flutter analyze
+
+      - name: Build release APK
+        if: inputs.build_type == 'apk'
+        run: flutter build apk --release
+
+      - name: Build release App Bundle
+        if: inputs.build_type == 'appbundle'
+        run: flutter build appbundle --release
+
+      - name: Upload APK
+        if: inputs.build_type == 'apk'
+        uses: actions/upload-artifact@v4
+        with:
+          name: art-block-puzzle-release-apk
+          path: build/app/outputs/flutter-apk/app-release.apk
+          if-no-files-found: error
+          retention-days: 14
+
+      - name: Upload App Bundle
+        if: inputs.build_type == 'appbundle'
+        uses: actions/upload-artifact@v4
+        with:
+          name: art-block-puzzle-release-aab
+          path: build/app/outputs/bundle/release/app-release.aab
+          if-no-files-found: error
+          retention-days: 14
