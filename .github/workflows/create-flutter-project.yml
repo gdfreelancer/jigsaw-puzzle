@@ -2,6 +2,11 @@ name: Initialize Flutter Project
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/create-flutter-project.yml"
 
 permissions:
   contents: write
