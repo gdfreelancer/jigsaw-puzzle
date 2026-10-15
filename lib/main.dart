@@ -43,13 +43,154 @@ const SizedBox(height:14),Row(children:[Expanded(child:OutlinedButton.icon(onPre
 class _Tile extends StatelessWidget{final String title,sub;final IconData icon;final VoidCallback tap;const _Tile(this.title,this.sub,this.icon,this.tap);@override Widget build(BuildContext c)=>Material(color:Colors.white,borderRadius:BorderRadius.circular(18),child:InkWell(onTap:tap,borderRadius:BorderRadius.circular(18),child:Padding(padding:const EdgeInsets.all(14),child:Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Icon(icon,color:green),const SizedBox(height:12),Text(title,style:const TextStyle(fontWeight:FontWeight.w900)),Text(sub,style:const TextStyle(color:muted,fontSize:11))]))));}
 class _Stat extends StatelessWidget{final String v,l;const _Stat(this.v,this.l);@override Widget build(BuildContext c)=>Expanded(child:Column(children:[Text(v,style:const TextStyle(fontSize:20,fontWeight:FontWeight.w900)),Text(l,style:const TextStyle(color:muted,fontSize:11))]));}
 class Levels extends StatelessWidget{const Levels({super.key});@override Widget build(BuildContext c)=>Frame('Choose your level',ListView(padding:const EdgeInsets.all(18),children:[const Text('Every picture tells a story.',style:TextStyle(color:muted)),const SizedBox(height:14),...List.generate(8,(i)=>Card(color:Colors.white,elevation:0,child:ListTile(leading:Art(artFiles[i],h:70,w:85),title:Text(artNames[i],style:const TextStyle(fontWeight:FontWeight.w900)),subtitle:Text((i>4?'Hard':'Easy')+' · Level '+(i+1).toString()),trailing:Icon(i>3?Icons.lock_outline:Icons.chevron_right,color:green),onTap:i>3?null:()=>go(c,Play(file:artFiles[i],title:artNames[i]))))),Btn('Daily challenge',()=>go(c,const Daily()),secondary:true)]));}
-class Play extends StatefulWidget{final String file,title;const Play({super.key,this.file='sunrise.svg',this.title='Golden Horizon'});@override State<Play> createState()=>_PlayState();}
-class _PlayState extends State<Play>{final Set<int> filled={0,2,3,5};@override Widget build(BuildContext c)=>Scaffold(body:SafeArea(child:Padding(padding:const EdgeInsets.all(16),child:Column(children:[
-Row(children:[IconButton(onPressed:()=>showDialog(context:c,builder:(_)=>const Pause()),icon:const Icon(Icons.pause)),Expanded(child:Text(widget.title,style:const TextStyle(fontSize:18,fontWeight:FontWeight.w900))),const Text('240 coins')]),
-const SizedBox(height:12),LinearProgressIndicator(value:filled.length/9,color:green,backgroundColor:const Color(0xFFE3E6DB)),const SizedBox(height:8),Text(filled.length.toString()+'/9 pieces · Tap a tile to place it',style:const TextStyle(color:muted)),
-Expanded(child:Center(child:AspectRatio(aspectRatio:1,child:Stack(children:[Positioned.fill(child:Art(widget.file)),GridView.builder(physics:const NeverScrollableScrollPhysics(),padding:EdgeInsets.zero,gridDelegate:const SliverGridDelegateWithFixedCrossAxisCount(crossAxisCount:3),itemCount:9,itemBuilder:(ctx,i)=>GestureDetector(onTap:(){setState(()=>filled.add(i));if(filled.length==9)go(c,const Complete());},child:Container(margin:const EdgeInsets.all(2),decoration:BoxDecoration(color:filled.contains(i)?Colors.transparent:const Color(0xDDF7F4ED),border:Border.all(color:Colors.white,width:2),borderRadius:BorderRadius.circular(7)),child:filled.contains(i)?const Icon(Icons.check,color:Colors.white):Center(child:Text((i+1).toString(),style:const TextStyle(fontWeight:FontWeight.w900)))))])))),
-Row(children:[Expanded(child:TextButton.icon(onPressed:()=>go(c,const Hints()),icon:const Icon(Icons.lightbulb_outline),label:const Text('Hint'))),Expanded(child:TextButton.icon(onPressed:()=>setState(()=>filled.remove(filled.isEmpty?0:filled.last)),icon:const Icon(Icons.undo),label:const Text('Undo'))),Expanded(child:TextButton.icon(onPressed:()=>showDialog(context:c,builder:(_)=>const HelpDialog()),icon:const Icon(Icons.help_outline),label:const Text('Help'))),Expanded(child:TextButton.icon(onPressed:()=>showDialog(context:c,builder:(_)=>const ExitDialog()),icon:const Icon(Icons.close),label:const Text('Exit')))])
-]))));}}
+class Play extends StatefulWidget {
+  final String file, title;
+  const Play({super.key, this.file = 'sunrise.svg', this.title = 'Golden Horizon'});
+
+  @override
+  State<Play> createState() => _PlayState();
+}
+
+class _PlayState extends State<Play> {
+  final Set<int> filled = {0, 2, 3, 5};
+
+  @override
+  Widget build(BuildContext c) => Scaffold(
+        body: SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Column(
+              children: [
+                Row(
+                  children: [
+                    IconButton(
+                      onPressed: () => showDialog(
+                        context: c,
+                        builder: (_) => const Pause(),
+                      ),
+                      icon: const Icon(Icons.pause),
+                    ),
+                    Expanded(
+                      child: Text(
+                        widget.title,
+                        style: const TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.w900,
+                        ),
+                      ),
+                    ),
+                    const Text('240 coins'),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                LinearProgressIndicator(
+                  value: filled.length / 9,
+                  color: green,
+                  backgroundColor: const Color(0xFFE3E6DB),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  '${filled.length}/9 pieces · Tap a tile to place it',
+                  style: const TextStyle(color: muted),
+                ),
+                Expanded(
+                  child: Center(
+                    child: AspectRatio(
+                      aspectRatio: 1,
+                      child: Stack(
+                        children: [
+                          Positioned.fill(child: Art(widget.file)),
+                          GridView.builder(
+                            physics: const NeverScrollableScrollPhysics(),
+                            padding: EdgeInsets.zero,
+                            gridDelegate:
+                                const SliverGridDelegateWithFixedCrossAxisCount(
+                              crossAxisCount: 3,
+                            ),
+                            itemCount: 9,
+                            itemBuilder: (ctx, i) => GestureDetector(
+                              onTap: () {
+                                setState(() => filled.add(i));
+                                if (filled.length == 9) {
+                                  go(c, const Complete());
+                                }
+                              },
+                              child: Container(
+                                margin: const EdgeInsets.all(2),
+                                decoration: BoxDecoration(
+                                  color: filled.contains(i)
+                                      ? Colors.transparent
+                                      : const Color(0xDDF7F4ED),
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 2,
+                                  ),
+                                  borderRadius: BorderRadius.circular(7),
+                                ),
+                                child: filled.contains(i)
+                                    ? const Icon(Icons.check, color: Colors.white)
+                                    : Center(
+                                        child: Text(
+                                          (i + 1).toString(),
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.w900,
+                                          ),
+                                        ),
+                                      ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                      child: TextButton.icon(
+                        onPressed: () => go(c, const Hints()),
+                        icon: const Icon(Icons.lightbulb_outline),
+                        label: const Text('Hint'),
+                      ),
+                    ),
+                    Expanded(
+                      child: TextButton.icon(
+                        onPressed: () => setState(() {
+                          if (filled.isNotEmpty) filled.remove(filled.last);
+                        }),
+                        icon: const Icon(Icons.undo),
+                        label: const Text('Undo'),
+                      ),
+                    ),
+                    Expanded(
+                      child: TextButton.icon(
+                        onPressed: () => showDialog(
+                          context: c,
+                          builder: (_) => const HelpDialog(),
+                        ),
+                        icon: const Icon(Icons.help_outline),
+                        label: const Text('Help'),
+                      ),
+                    ),
+                    Expanded(
+                      child: TextButton.icon(
+                        onPressed: () => showDialog(
+                          context: c,
+                          builder: (_) => const ExitDialog(),
+                        ),
+                        icon: const Icon(Icons.close),
+                        label: const Text('Exit'),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+}
 class Complete extends StatelessWidget{const Complete({super.key});@override Widget build(BuildContext c)=>Scaffold(body:SafeArea(child:ListView(padding:const EdgeInsets.all(22),children:[const SizedBox(height:20),const Icon(Icons.check_circle,color:green,size:70),const Text('MASTERPIECE!',textAlign:TextAlign.center,style:TextStyle(color:green,fontWeight:FontWeight.w900,letterSpacing:2)),const Text('Beautifully done.',textAlign:TextAlign.center,style:TextStyle(fontSize:30,fontWeight:FontWeight.w900)),const SizedBox(height:20),const Art('sunrise.svg',h:220,w:500),const Text('★★★',textAlign:TextAlign.center,style:TextStyle(color:Color(0xFFE6B94F),fontSize:38)),const Text('02:48 · 9 pieces · +80 coins',textAlign:TextAlign.center,style:TextStyle(color:muted)),const SizedBox(height:20),Btn('Next level',()=>go(c,const Play(file:'forest.svg',title:'Misty Forest')),icon:Icons.arrow_forward),const SizedBox(height:10),Btn('Back to home',()=>Navigator.popUntil(c,(r)=>r.isFirst),secondary:true)])));}
 class Daily extends StatelessWidget{const Daily({super.key});@override Widget build(BuildContext c)=>Frame('Daily puzzle',ListView(padding:const EdgeInsets.all(20),children:[Container(padding:const EdgeInsets.all(22),decoration:BoxDecoration(color:ink,borderRadius:BorderRadius.circular(22)),child:const Column(crossAxisAlignment:CrossAxisAlignment.start,children:[Text('TODAY’S CHALLENGE',style:TextStyle(color:lime,fontWeight:FontWeight.w900)),Text('A new little\nchallenge.',style:TextStyle(color:Colors.white,fontSize:30,fontWeight:FontWeight.w900)),Text('Keep your daily streak alive.',style:TextStyle(color:Colors.white70))])),const SizedBox(height:18),const Art('meadow.svg',h:220,w:500),const SizedBox(height:18),const Text('Reward: 120 coins · Streak: 3 days',textAlign:TextAlign.center,style:TextStyle(color:muted)),const SizedBox(height:20),Btn('Start daily puzzle',()=>go(c,const Play(file:'meadow.svg',title:'Wildflower')),icon:Icons.play_arrow),Btn('View rewards',()=>go(c,const Rewards()),secondary:true)]));}
 class Pause extends StatelessWidget{const Pause({super.key});@override Widget build(BuildContext c)=>AlertDialog(title:const Text('Take a breather'),content:const Text('Your progress is safe.'),actions:[TextButton(onPressed:()=>Navigator.pop(c),child:const Text('Resume')),TextButton(onPressed:(){Navigator.pop(c);go(c,const Settings());},child:const Text('Settings')),TextButton(onPressed:()=>showDialog(context:c,builder:(_)=>const ExitDialog()),child:const Text('Exit puzzle'))]);}
