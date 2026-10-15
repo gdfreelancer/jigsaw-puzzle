@@ -22,9 +22,9 @@ class SplashScreen extends StatelessWidget {
         const SizedBox(height:20),
         const Text('Slow down. Find the pieces. Reveal the art.',style:TextStyle(color:muted,fontSize:16)),
         const SizedBox(height:28),
-        const Artwork('sunrise.svg',height:230,width:500),
+        const Art('sunrise.svg',h:230,w:500),
         const SizedBox(height:26),
-        ActionButton('Enter studio',()=>Navigator.pushReplacement(context,MaterialPageRoute(builder:(_)=>const HomeScreen())),icon:Icons.arrow_forward_rounded),
+        Btn('Enter studio',()=>Navigator.pushReplacement(context,MaterialPageRoute(builder:(_)=>const Home())),icon:Icons.arrow_forward),
       ],
     ))),
   );
